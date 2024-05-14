@@ -1,69 +1,90 @@
+import pygame
 import random
+import os
 
-suits = ["H", "D", "C", "S"]
-values = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"]
+# Initialize Pygame
+pygame.init()
 
-def deck():
-    cardDeck = []
-    for suit in suits:
-        for value in values:
-            cardDeck.append(value + suit)
-    return cardDeck
+# Define some colors
+BLACK = (0, 0, 0)
+WHITE = (255, 255, 255)
 
-def draw(deck):
-    deckSize = len(deck) - 1
-    randNum = random.randint(0, deckSize)
-    return deck.pop(randNum)
+# Set the width and height of the screen [width, height]
+SCREEN_WIDTH = 800
+SCREEN_HEIGHT = 600
+screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 
-def drawNum(num, deck):
-    cards = []
-    for i in range(num):
-        cards.append(draw(deck))
-    return cards
+# Define card path
+CARDPATH = "PNG-cards-1.3"
 
-def dealHand(deck):
-    return drawNum(2, deck)
+# Set the title of the window
+pygame.display.set_caption("Playing Card Game")
 
-def dealFlop(deck):
-    return drawNum(3, deck)
+# Define the Card class
+class Card:
+    def __init__(self, suit, value):
+        self.suit = suit
+        self.value = value
+        self.image = pygame.image.load(os.path.join(CARDPATH, f"{self.value}_of_{self.suit}.png"))
 
-def dealTurn(deck):
-    return drawNum(1, deck)
+# Function to create a deck of cards
+def create_deck():
+    suits = ['hearts', 'diamonds', 'clubs', 'spades']
+    values = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'jack', 'queen', 'king', 'ace']
+    deck = [Card(suit, value) for suit in suits for value in values]
+    return deck
 
-def dealRiver(deck):
-    return drawNum(1, deck)
+# Function to shuffle the deck
+def shuffle_deck(deck):
+    random.shuffle(deck)
 
+# Function to draw a card
+def draw_card(deck):
+    return deck.pop(0)
 
-def deal(deck):
-    communityCards = []
+# Function to display a card
+def display_card(card, x, y):
+    screen.blit(card.image, [x, y])
 
-    print(*dealHand(deck))
-    input("FLOP: ")
-    communityCards += dealFlop(deck)
-    print(*communityCards)
-    input("TURN: ")
-    communityCards += dealTurn(deck)
-    print(*communityCards)
-    input("RIVER: ")
-    communityCards += dealRiver(deck)
-    print(*communityCards)
-
+# Main function
 def main():
-    print("press any button to see show next cards")
-    
-    cardDeck = deck()
-    loop = True
+    # Create the deck of cards
+    deck = create_deck()
+    shuffle_deck(deck)
 
-    while loop:
-        print("=" * 5 + "POKER" + "=" * 5)
-        deal(cardDeck)
+    # Main loop
+    done = False
+    clock = pygame.time.Clock()
 
-        print("=" * 15)
-        x = input("press q to quit, any other to play again: ")
-        if x == "q" or x == "Q":
-            loop = False
+    card = draw_card(deck)
+
+    while not done:
+        # --- Main event loop
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                done = True
+            elif event.type == pygame.MOUSEBUTTONUP:
+                # Draw a card 
+                if len(deck) > 0:
+                    card = draw_card(deck)
 
 
-main()
+        # --- Game logic should go here
 
+        # --- Drawing code should go here
+        screen.fill(WHITE)
+        display_card(card, 100, 100) 
+
+        # --- Update the screen
+        pygame.display.flip()
+
+        # --- Limit frames per second
+        clock.tick(60)
+
+    # Close the window and quit
+    pygame.quit()
+
+# Run the main function
+if __name__ == "__main__":
+    main()
 
