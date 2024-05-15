@@ -8,6 +8,7 @@ pygame.init()
 # Define some colors
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
+GREEN = (53,101,77)
 
 # Set the width and height of the screen [width, height]
 SCREEN_WIDTH = 800
@@ -157,7 +158,7 @@ def main():
         # --- Game logic should go here
 
         # --- Drawing code should go here
-        screen.fill(WHITE)
+        screen.fill(GREEN)
         board.display()
 
         # --- Update the screen
