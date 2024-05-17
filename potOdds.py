@@ -58,6 +58,7 @@ class Board:
     def __init__(self, bet, pot):
         self.bet = bet
         self.pot = pot
+        self.pot_odds = Pot_Odds(bet, pot)
     def display(self):
         self.bet.display()
         self.pot.display()
@@ -75,7 +76,24 @@ class Stage:
             print(self.stageNum, "SHOW ODDS")
 
 
-
+class Pot_Odds:
+    def __init__(self, bet, pot):
+        self.bet = bet
+        self.pot = pot
+        self.numerator = 0
+        self.denominator = 0
+    def get_betting_percent(self):
+        betting_percent =  self.bet / (self.pot + self.bet) * 100
+        print(betting_percent)
+    def get_pot_odds_ratio(self):
+        risk = 1
+        value = self.pot/self.bet
+        print(f'{value}:{risk}')
+    def get_pot_odds_value(self):
+        risk = self.bet
+        value = self.pot
+        print(f'{value}:{risk}')
+        
 
 # Main function
 def main():
@@ -92,7 +110,12 @@ def main():
             if event.type == pygame.QUIT:
                 done = True
             elif event.type == pygame.MOUSEBUTTONUP:
-                board.stage.advance()
+                pot = random.randint(1, 10) * 100
+                bet = random.randint(1, 10) * 10
+                Board(bet, pot).pot_odds.get_pot_odds_ratio()
+                Board(bet, pot).pot_odds.get_pot_odds_value()
+                Board(bet, pot).pot_odds.get_betting_percent()
+                print("============")
 
 
 
