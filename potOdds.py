@@ -35,6 +35,8 @@ class Pot:
         self.pot = None
     def set_pot(self, pot):
         self.pot = pot
+    def add(self, int):
+        self.pot += int
     def display_pot(self):
         if not self.pot == None:
             display_text(str(self.pot), 300, 300) 
