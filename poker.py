@@ -28,20 +28,22 @@ class Card:
         self.value = value
         self.image = pygame.image.load(os.path.join(CARDPATH, f"{self.value}_of_{self.suit}.png"))
 
-# Function to create a deck of cards
-def create_deck():
-    suits = ['hearts', 'diamonds', 'clubs', 'spades']
-    values = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'jack', 'queen', 'king', 'ace']
-    deck = [Card(suit, value) for suit in suits for value in values]
-    return deck
+# Class for deck of cards
+class Deck():
+    def __init__(self):
+        self.deck = self.create()
+    def new_deck(self):
+        self.deck = self.create()
+    def shuffle(self):
+        random.shuffle(self.deck)
+    def create(self):
+        suits = ['hearts', 'diamonds', 'clubs', 'spades']
+        values = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'jack', 'queen', 'king', 'ace']
+        deck = [Card(suit, value) for suit in suits for value in values]
+        return deck
+    def draw_card(deck):
+        return deck.pop(0)
 
-# Function to shuffle the deck
-def shuffle_deck(deck):
-    random.shuffle(deck)
-
-# Function to draw a card
-def draw_card(deck):
-    return deck.pop(0)
 
 # Function to display a card
 def display_card(card, x, y):
@@ -92,17 +94,17 @@ class Board:
     def deal_hand(self):
         hand = []
         for i in range(2):
-            hand.append(draw_card(self.deck))
+            hand.append(self.deck.draw_card())
         self.player.hand = hand
     def deal_flop(self):
         flop = []
         for i in range(3):
-            flop.append(draw_card(self.deck))
+            flop.append(self.deck.draw_card())
         self.community_cards.flop = flop
     def deal_turn(self):
-        self.community_cards.turn = draw_card(self.deck)
+        self.community_cards.turn = self.deck.draw_card()
     def deal_river(self):
-        self.community_cards.river = draw_card(self.deck)
+        self.community_cards.river = self.deck.draw_card()
     def display(self):
         self.player.display()
         self.community_cards.display()
@@ -132,8 +134,8 @@ class Stage:
 # Main function
 def main():
     # Create the deck of cards
-    deck = create_deck()
-    shuffle_deck(deck)
+    deck = Deck()
+    deck.shuffle()
     board = Board(deck)
 
     # Main loop
@@ -147,8 +149,8 @@ def main():
                 done = True
             elif event.type == pygame.MOUSEBUTTONUP:
                 if board.stage.stageNum >= 4:
-                    deck = create_deck()
-                    shuffle_deck(deck)
+                    deck.new_deck()
+                    deck.shuffle()
                     board = Board(deck)
                 else:
                     board.stage.advance()
