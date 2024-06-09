@@ -2,8 +2,12 @@ import pygame
 import random
 import os
 
+from cards import *
+from potOdds import *
+
 # Initialize Pygame
 pygame.init()
+pygame.font.init()
 
 # Define some colors
 BLACK = (0, 0, 0)
@@ -15,82 +19,148 @@ SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 
+# Set the width and height of the cards
+CARD_WIDTH = 100
+CARD_HEIGHT = 145
+CARD_GAP = 20
+
 # Define card path
 CARDPATH = "PNG-cards-1.3"
 
 # Set the title of the window
 pygame.display.set_caption("Playing Card Game")
 
-# Define the Card class
-class Card:
-    def __init__(self, suit, value):
-        self.suit = suit
-        self.value = value
-        self.image = pygame.image.load(os.path.join(CARDPATH, f"{self.value}_of_{self.suit}.png"))
 
-# Class for deck of cards
-class Deck():
-    def __init__(self):
-        self.deck = self.create()
-    def new_deck(self):
-        self.deck = self.create()
-    def shuffle(self):
-        random.shuffle(self.deck)
-    def create(self):
-        suits = ['hearts', 'diamonds', 'clubs', 'spades']
-        values = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'jack', 'queen', 'king', 'ace']
-        deck = [Card(suit, value) for suit in suits for value in values]
-        return deck
-    def draw_card(deck):
-        return deck.pop(0)
 
+# Function to display text
+def display_text(string, x, y):
+    # Define a font and size
+    font = pygame.font.SysFont(None, 30)
+    # Render the text
+    text_surface = font.render(string, False, WHITE)
+    text_width = text_surface.get_width()
+    text_height = text_surface.get_height()
+    screen.blit(text_surface, [x - text_width/2, y - text_height/2])
 
 # Function to display a card
 def display_card(card, x, y):
     image = card.image
-    scaledImage = pygame.transform.scale(image, (image.get_width() / 5, image.get_height() / 5))
+    scaledImage = pygame.transform.scale(image, (CARD_WIDTH, CARD_HEIGHT))
     screen.blit(scaledImage, [x, y])
 
 # Defining Player clas
 class Player:
     def __init__(self):
         self.hand = None
-    def display_hand(self):
-        if not self.hand == None:
-            display_card(self.hand[0], 300, 300) 
-            display_card(self.hand[1], 420, 300) 
-    def display(self):
-        self.display_hand()
+
+class Pot:
+    def __init__(self):
+        self.value = None
+    def set(self, pot):
+        self.value = pot
+    def add(self, int):
+        self.value += int
+
+class Bet:
+    def __init__(self):
+        self.value = None
+    def set(self, pot):
+        self.value = pot
 
 class Community_Cards:
     def __init__(self):
         self.flop = None
         self.turn = None
         self.river = None
+
+
+# Board Display
+class Board_Display:
+    def __init__(self, player, community_cards, bet, pot):
+        self.player = player
+        self.community_cards = community_cards
+        self.pot = pot
+        self.bet = bet
+        # Screen
+        self.width, self.hight = pygame.display.get_surface().get_size()
+        # Community Card positions
+        self.community_card_y = self.hight / 10 * 2
+        self.community_card_x = (self.width / 2) - CARD_WIDTH / 2 - (2 * (CARD_WIDTH + CARD_GAP))
+        # Player Card positions
+        self.player_card_y = (self.hight / 10) * 5
+        self.player_card_x = (self.width / 2) - (CARD_WIDTH / 2) - ((CARD_GAP + CARD_WIDTH) / 2)
+        # Pot position
+        self.pot_x = self.width / 2
+        self.pot_y = self.hight/10 * 1
+        # Bet position
+        self.bet_x = self.width / 2
+        self.bet_y = self.hight / 10 * 9
+        # Potodds position
+        self.potOdds_x =  self.width / 10 * 8
+        self.potOdds_y =  self.hight / 10 * 8
     def display_flop(self):
-        if not self.flop == None:
-            display_card(self.flop[0], 100, 100) 
-            display_card(self.flop[1], 220, 100) 
-            display_card(self.flop[2], 340, 100) 
+        if not self.community_cards.flop == None:
+            display_card(self.community_cards.flop[0], 
+                         self.community_card_x, 
+                         self.community_card_y) 
+            display_card(self.community_cards.flop[1], 
+                         self.community_card_x + (CARD_WIDTH + CARD_GAP), 
+                         self.community_card_y) 
+            display_card(self.community_cards.flop[2], 
+                         self.community_card_x + 2 * (CARD_WIDTH + CARD_GAP),
+                         self.community_card_y) 
     def display_turn(self):
-        if not self.turn == None:
-            display_card(self.turn, 460, 100) 
+        if not self.community_cards.turn == None:
+            display_card(self.community_cards.turn, 
+                         self.community_card_x + 3 * (CARD_WIDTH + CARD_GAP),
+                         self.community_card_y) 
     def display_river(self):
-        if not self.river == None:
-            display_card(self.river, 580, 100) 
+        if not self.community_cards.river == None:
+            display_card(self.community_cards.river, 
+                         self.community_card_x + 4 * (CARD_WIDTH + CARD_GAP),
+                         self.community_card_y) 
+    def display_hand(self):
+        if not self.player.hand == None:
+            display_card(self.player.hand[0],
+                         self.player_card_x,
+                         self.player_card_y) 
+            display_card(self.player.hand[1],
+                         self.player_card_x + (CARD_WIDTH + CARD_GAP),
+                         self.player_card_y) 
+    def display_pot(self):
+        if not self.pot.value == None:
+            string = "Pot: " + str(self.pot.value)
+            display_text(string, self.pot_x, self.pot_y)
+    def display_bet(self):
+        if not self.bet.value == None:
+            string = "bet: " + str(self.bet.value)
+            display_text(string, self.bet_x, self.bet_y)
+    def display_potOdds(self):
+        if not self.bet.value == None:
+            string = "potodds: " + "1:" + str(odds_ration(self.bet.value, self.pot.value)) + "    -     %: " + str(betting_percent(self.bet.value, self.pot.value))
+            display_text(string, self.potOdds_x, self.potOdds_y)
     def display(self):
+        self.display_pot()
+        self.display_bet()
+        self.display_potOdds()
         self.display_flop()
         self.display_turn()
         self.display_river()
+        self.display_hand()
+
+
 
 
 # Define Board Class
 class Board:
-    def __init__(self, deck):
+    def __init__(self, deck, bet, pot):
         self.deck = deck
         self.player = Player()
         self.community_cards = Community_Cards()
         self.stage = Stage(self)
+        self.bet = bet
+        self.pot = pot
+        self.board_display = Board_Display(self.player, self.community_cards, self.bet, self.pot)
     def deal_hand(self):
         hand = []
         for i in range(2):
@@ -106,8 +176,8 @@ class Board:
     def deal_river(self):
         self.community_cards.river = self.deck.draw_card()
     def display(self):
-        self.player.display()
-        self.community_cards.display()
+        self.board_display.display()
+
 
 class Stage:
     def __init__(self, board):
@@ -136,7 +206,7 @@ def main():
     # Create the deck of cards
     deck = Deck()
     deck.shuffle()
-    board = Board(deck)
+    board = Board(deck, Bet(), Pot())
 
     # Main loop
     done = False
@@ -148,10 +218,12 @@ def main():
             if event.type == pygame.QUIT:
                 done = True
             elif event.type == pygame.MOUSEBUTTONUP:
+                board.pot.set(random.randint(1, 10) * 100)
+                board.bet.set(random.randint(1, 10) * 10)
                 if board.stage.stageNum >= 4:
                     deck.new_deck()
                     deck.shuffle()
-                    board = Board(deck)
+                    board = Board(deck, Bet(), Pot())
                 else:
                     board.stage.advance()
 
